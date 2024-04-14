@@ -14,6 +14,8 @@
 
     public struct Piece
     {
+        public static readonly Piece Null = new(PieceType.Null, false, true);
+
         public PieceType Type = PieceType.Null;
         public bool Color = false;
         public bool HasMoved = false;

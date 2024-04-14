@@ -1,5 +1,12 @@
 ﻿namespace ChessEngineSource
 {
+    public enum GameState : byte
+    {
+        Playing,
+        WhiteVictory,
+        BlackVictory,
+        Draw,
+    }
     public class Board
     {
         public static class Fens
@@ -33,13 +40,16 @@
 
         public Piece[] Pieces = new Piece[64];
         public bool WhiteToMove = true;
+        public Stack<PastMove> PastMoves = new();
+        public GameState GameState;
 
         public Piece this[int X, int Y] =>
             Pieces[X + (Y * 8)];
         public Piece this[int Index] =>
             Pieces[Index];
 
-        public Board(string Fen = Board.Fens.Default) =>
+        #region Construction
+        public Board(string Fen = Fens.Default) =>
             LoadFen(Fen);
 
         public void LoadFen(string Fen)
@@ -66,5 +76,38 @@
 
             WhiteToMove = Fen[^1] == 'w';
         }
+        #endregion
+
+        #region Moving
+        public void MakeMove(Move Move)
+        {
+            int StartIndex = Move.From.Index, EndIndex = Move.Too.Index;
+
+            Piece PieceAtStart = Pieces[StartIndex];
+            Piece PieceAtEnd = Pieces[EndIndex];
+
+            Pieces[EndIndex] = PieceAtStart;
+            Pieces[StartIndex] = Piece.Null;
+
+            PastMoves.Push(new(StartIndex, EndIndex, PieceAtStart, PieceAtEnd));
+            WhiteToMove = !WhiteToMove;
+        }
+        
+        public void UndoMoves(int Count)
+        {
+            for (int MoveIndex = 0; MoveIndex < Count && PastMoves.Count > 0; MoveIndex++)
+                UndoMove();
+        }
+        public void UndoMove()
+        {
+            if (PastMoves.Count > 0)
+            {
+                PastMove PastMove = PastMoves.Pop();
+
+                Pieces[PastMove.From] = PastMove.OriginalStartPiece;
+                Pieces[PastMove.Too] = PastMove.OriginalEndPiece;
+            }
+        }
+        #endregion
     }
 }

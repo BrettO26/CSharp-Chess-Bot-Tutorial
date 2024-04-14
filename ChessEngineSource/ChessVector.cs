@@ -1,4 +1,5 @@
 ﻿
+
 namespace ChessEngineSource
 {
     public struct ChessVector
@@ -43,5 +44,25 @@ namespace ChessEngineSource
             7 => 'h',
             _ => '?',
         } + (Y + 1).ToString()[..1];
+
+        /// <summary>
+        /// Parses strings to vectors that are in the following formats: A1 or 00
+        /// </summary>
+        public static ChessVector Parse(string RawVector)
+        {
+            RawVector = RawVector.Trim().ToLower();
+            char XRaw = RawVector[0], YRaw = RawVector[1];
+            if (char.IsLetter(XRaw) && char.IsDigit(YRaw))
+            {
+                int X = XRaw - 'a', Y = YRaw - '0' - 1;
+                return new ChessVector(X, Y);
+            }
+            else if (char.IsDigit(XRaw) && char.IsDigit(YRaw))
+            {
+                int X = XRaw - '0', Y = YRaw - '0' - 1;
+                return new ChessVector(X, Y);
+            }
+            else throw new ArgumentException($"Invalid vector data: \"{RawVector}\" is not in a valid format.");
+        }
     }
 }
